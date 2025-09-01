@@ -1,1 +1,11 @@
+# Dependency directories
+/node_modules/
+/dist/
 
+# Env files and Firebase config
+.env
+firebase-config.js
+
+# OS files
+.DS_Store
+Thumbs.db
