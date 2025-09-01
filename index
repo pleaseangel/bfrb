@@ -1,1 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BFRB Urge Simulator</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <!-- Authentication Check Overlay -->
+  <div id="authLoader" class="auth-overlay">
+    <div class="auth-card">
+      <div class="spinner"></div>
+      <p>Loading...</p>
+    </div>
+  </div>
 
+  <!-- Main App Content -->
+  <div id="appContent" style="display: none;">
+    <!-- User Info Bar -->
+    <div class="user-bar">
+      <div class="user-info">
+        <span>Welcome, <strong id="userName">User</strong></span>
+        <span class="tier-badge" id="userTier">Free Plan</span>
+      </div>
+      <div class="user-actions">
+        <span id="sessionsRemaining">3 sessions remaining today</span>
+        <button id="upgradeBtn" class="upgrade-btn">Upgrade</button>
+        <button id="logoutBtn" class="logout-btn">Logout</button>
+      </div>
+    </div>
+
+    <!-- Session Limit Warning -->
+    <div id="sessionLimitWarning" class="session-warning" style="display: none;">
+      <div class="warning-card">
+        <h3>Daily Session Limit Reached</h3>
+        <p>You've used all your sessions for today. Upgrade to continue practicing!</p>
+        <button onclick="window.location.href='subscription.html'" class="upgrade-cta">Upgrade Now</button>
+      </div>
+    </div>
+
+    <!-- Toast Messages -->
+    <div class="toast" id="toast">Message</div>
+
+    <!-- Header with KPIs and Controls -->
+    <header>
+      <div class="kpi">
+        <div>Session <b id="clock">03:00</b></div>
+        <div>Resist pts <b id="resist">0</b></div>
+        <div>Trap hits <b id="hits">0</b></div>
+        <div>Pull attempts <b id="pulls">0</b></div>
+        <div>Streak days <b id="streak">0</b></div>
+      </div>
+      <div class="controls">
+        <button id="startBtn">Start</button>
+        <button id="resetBtn" class="secondary">Reset</button>
+        <button id="breatheBtn" class="ghost">Breathing 60s</button>
+        <button id="trainerBtn" class="ghost">Trainer mode</button>
+        <button id="soundBtn" class="ghost">Sound: OFF</button>
+        <button id="customBtn" class="ghost">Customize</button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="wrap">
+      <!-- Hair Patch Simulator -->
+      <div id="patch" class="card">
+        <div class="overlay" id="overlay">
+          <div class="card" style="text-align:center; min-width:300px;">
+            <div style="font-weight:700; margin-bottom:6px; color:var(--warn)">Pause</div>
+            <div class="category-tag" id="categoryTag">Physical</div>
+            <div class="muted" style="max-width:340px;" id="pauseMessage">Squeeze your fists tight and hold</div>
+            <div class="countdown" id="countdown">8</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Instructions -->
+      <div class="card" style="margin-top:14px">
+        <b>How to use</b>
+        <ol class="muted">
+          <li>Tap or drag on the hair patch if you feel an urge.</li>
+          <li>If a <i>trap hair</i> triggers, pause and follow the competing response guidance.</li>
+          <li>Earn resist points by letting the timer run without triggering traps.</li>
+        </ol>
+      </div>
+
+      <!-- Customization Panel -->
+      <div class="card custom-responses" id="customPanel" style="margin-top:14px; display:none;">
+        <b>Customize Competing Responses</b>
+        <div style="margin-top:12px;">
+          <select id="categorySelect" style="padding:6px; border:1px solid #e5e7eb; border-radius:6px;">
+            <option value="physical">Physical</option>
+            <option value="breathing">Breathing</option>
+            <option value="cognitive">Cognitive</option>
+          </select>
+          <input type="text" id="customInput" class="custom-input" placeholder="Add your own competing response...">
+          <button id="addCustomBtn" style="margin-top:8px;">Add Response</button>
+        </div>
+        <div class="response-list" id="responseList"></div>
+      </div>
+
+      <!-- Premium Features Notice -->
+      <div class="card premium-notice" id="premiumNotice" style="margin-top:14px; display:none;">
+        <div class="premium-content">
+          <h3>🌟 Premium Features Available</h3>
+          <ul>
+            <li>Detailed progress analytics and charts</li>
+            <li>Advanced customization options</li>
+            <li>Export session data</li>
+            <li>Priority customer support</li>
+          </ul>
+          <button onclick="window.location.href='subscription.html'" class="upgrade-cta">Upgrade to unlock</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <div>Wellness companion. Not medical advice.</div>
+      <div class="footer-links">
+        <a href="dashboard.html" id="dashboardLink" style="display:none;">Dashboard</a>
+        <a href="subscription.html">Manage Subscription</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  
+  <!-- App Scripts -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
