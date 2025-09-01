@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
       appContent.style.display = 'block';
       
       // Update user info
-      updateUserInfo(user);
+      await updateUserInfo(user);
       
       // Load user data and check session limits
       await updateSessionInfo();
@@ -35,7 +35,8 @@ document.addEventListener('DOMContentLoaded', function() {
       const userData = await window.firebaseHelpers.getUserData();
       
       // Update user name
-      userName.textContent = user.displayName || user.email.split('@')[0] || 'User';
+      const displayName = user.displayName || user.email.split('@')[0] || 'User';
+      userName.textContent = displayName;
       
       // Update tier badge
       if (userData) {
@@ -46,13 +47,19 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show/hide premium features
         if (tier === 'free') {
           premiumNotice.style.display = 'block';
+          upgradeBtn.style.display = 'inline-block';
         } else {
           premiumNotice.style.display = 'none';
           dashboardLink.style.display = 'inline';
+          if (tier === 'tier2') {
+            upgradeBtn.style.display = 'none'; // Hide upgrade for premium users
+          }
         }
       }
     } catch (error) {
       console.error('Error updating user info:', error);
+      userName.textContent = 'User';
+      userTier.textContent = 'Free Plan';
     }
   }
 
@@ -62,35 +69,56 @@ document.addEventListener('DOMContentLoaded', function() {
       const sessionCheck = await window.firebaseHelpers.checkSessionLimit();
       
       if (sessionCheck.canStart) {
-        const remaining = sessionCheck.remaining === Infinity ? 
-          'Unlimited' : 
-          `${sessionCheck.remaining} session${sessionCheck.remaining !== 1 ? 's' : ''}`;
-        sessionsRemaining.textContent = `${remaining} remaining today`;
+        let remainingText;
+        if (sessionCheck.remaining === Infinity) {
+          remainingText = 'Unlimited sessions';
+        } else {
+          remainingText = `${sessionCheck.remaining} session${sessionCheck.remaining !== 1 ? 's' : ''} remaining today`;
+        }
+        
+        sessionsRemaining.textContent = remainingText;
         sessionsRemaining.style.color = '';
+        
+        // Hide session limit warning if it's showing
+        const warning = document.getElementById('sessionLimitWarning');
+        if (warning) {
+          warning.style.display = 'none';
+        }
       } else {
         sessionsRemaining.textContent = 'Daily limit reached';
         sessionsRemaining.style.color = 'var(--warn)';
-        // Show session limit warning
-        showSessionLimitWarning();
+        
+        // Don't auto-show warning here, let the start button trigger it
       }
     } catch (error) {
       console.error('Error checking session limits:', error);
       sessionsRemaining.textContent = 'Unable to check sessions';
+      sessionsRemaining.style.color = 'var(--warn)';
     }
   }
 
   // Show session limit warning
   function showSessionLimitWarning() {
     const warning = document.getElementById('sessionLimitWarning');
-    warning.style.display = 'flex';
+    if (warning) {
+      warning.style.display = 'flex';
+    }
+  }
+
+  // Hide session limit warning
+  function hideSessionLimitWarning() {
+    const warning = document.getElementById('sessionLimitWarning');
+    if (warning) {
+      warning.style.display = 'none';
+    }
   }
 
   // Get display name for subscription tier
   function getTierDisplayName(tier) {
     const tierNames = {
       'free': 'Free Plan',
-      'tier1': 'Pro Plan',
-      'tier2': 'Premium Plan'
+      'tier1': 'Pro Plan ($7/month)',
+      'tier2': 'Premium Plan ($15/month)'
     };
     return tierNames[tier] || 'Free Plan';
   }
@@ -98,11 +126,19 @@ document.addEventListener('DOMContentLoaded', function() {
   // Logout functionality
   logoutBtn.addEventListener('click', async function() {
     try {
+      // Show loading state
+      logoutBtn.textContent = 'Signing out...';
+      logoutBtn.disabled = true;
+      
       await firebase.auth().signOut();
       // Redirect handled by onAuthStateChanged
     } catch (error) {
       console.error('Error signing out:', error);
       showToast('Error signing out. Please try again.');
+      
+      // Reset button
+      logoutBtn.textContent = 'Logout';
+      logoutBtn.disabled = false;
     }
   });
 
@@ -111,16 +147,59 @@ document.addEventListener('DOMContentLoaded', function() {
     window.location.href = 'subscription.html';
   });
 
+  // Close session warning when clicking outside
+  document.addEventListener('click', function(e) {
+    const warning = document.getElementById('sessionLimitWarning');
+    const warningCard = document.querySelector('.warning-card');
+    
+    if (warning && warning.style.display === 'flex') {
+      if (!warningCard.contains(e.target)) {
+        hideSessionLimitWarning();
+      }
+    }
+  });
+
   // Utility function to show toast messages
-  window.showToast = function(message) {
+  window.showToast = function(message, duration = 3000) {
     const toast = document.getElementById('toast');
-    toast.textContent = message;
-    toast.classList.add('show');
-    setTimeout(() => {
-      toast.classList.remove('show');
-    }, 3000);
+    if (toast) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, duration);
+    }
   };
 
-  // Export session info update function for use by app.js
+  // Export functions for use by app.js
   window.updateSessionInfo = updateSessionInfo;
+  window.showSessionLimitWarning = showSessionLimitWarning;
+  window.hideSessionLimitWarning = hideSessionLimitWarning;
+
+  // Check for email verification status
+  firebase.auth().onAuthStateChanged(function(user) {
+    if (user && !user.emailVerified) {
+      // Show a subtle reminder about email verification
+      setTimeout(() => {
+        showToast('💡 Tip: Verify your email for better account security', 5000);
+      }, 3000);
+    }
+  });
+
+  // Handle network status
+  window.addEventListener('online', function() {
+    showToast('✅ Connection restored');
+  });
+
+  window.addEventListener('offline', function() {
+    showToast('⚠️ No internet connection', 5000);
+  });
+
+  // Performance monitoring
+  window.addEventListener('load', function() {
+    // Simple performance check
+    if (performance.now() > 3000) {
+      console.warn('App took longer than 3 seconds to load');
+    }
+  });
 });
