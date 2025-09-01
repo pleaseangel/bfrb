@@ -3,40 +3,583 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>UrgePause - Subscription</title>
-  <link rel="stylesheet" href="css/auth.css" />
+  <title>Choose Your Plan - BFRB Urge Simulator</title>
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    .subscription-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    
+    .subscription-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .subscription-header h1 {
+      font-size: 2.5rem;
+      margin: 0 0 12px;
+      color: var(--fg);
+    }
+    
+    .subscription-header p {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin: 0;
+    }
+    
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+      margin: 40px 0;
+    }
+    
+    .plan-card {
+      background: var(--card);
+      border: 2px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 32px 24px;
+      text-align: center;
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .plan-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    }
+    
+    .plan-card.current {
+      border-color: var(--ok);
+      background: linear-gradient(135deg, #f0fdf4, #ffffff);
+    }
+    
+    .plan-card.popular {
+      border-color: var(--premium);
+      background: linear-gradient(135deg, var(--premium-light), #ffffff);
+      transform: scale(1.05);
+    }
+    
+    .plan-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--ok);
+      color: white;
+      padding: 4px 16px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .plan-badge.popular {
+      background: var(--premium);
+    }
+    
+    .plan-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0 0 8px;
+      color: var(--fg);
+    }
+    
+    .plan-description {
+      color: var(--muted);
+      margin: 0 0 24px;
+      font-size: 14px;
+    }
+    
+    .plan-price {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--fg);
+      margin: 0 0 8px;
+    }
+    
+    .plan-price .currency {
+      font-size: 1.2rem;
+      color: var(--muted);
+    }
+    
+    .plan-period {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0 0 24px;
+    }
+    
+    .plan-features {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 32px;
+      text-align: left;
+    }
+    
+    .plan-features li {
+      padding: 6px 0;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .plan-features li::before {
+      content: "✓";
+      color: var(--ok);
+      font-weight: 600;
+    }
+    
+    .plan-button {
+      width: 100%;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .plan-button.current {
+      background: var(--ok);
+      color: white;
+      cursor: default;
+    }
+    
+    .plan-button.subscribe {
+      background: var(--accent);
+      color: white;
+    }
+    
+    .plan-button.subscribe:hover {
+      background: #1d4ed8;
+    }
+    
+    .plan-button.premium {
+      background: var(--premium);
+      color: white;
+    }
+    
+    .plan-button.premium:hover {
+      background: #6d28d9;
+    }
+    
+    .plan-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .loading-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid transparent;
+      border-top: 2px solid currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-right: 8px;
+    }
+    
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+    
+    .back-link:hover {
+      text-decoration: underline;
+    }
+    
+    .user-info {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    
+    .error-message {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin: 16px 0;
+      text-align: center;
+    }
+    
+    .success-message {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #16a34a;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin: 16px 0;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <div class="card">
-      <h2>Choose Your Plan</h2>
-      <p class="muted">Unlock more sessions and features.</p>
-
-      <div class="pricing-tier">
-        <h3>Free Plan</h3>
-        <p>3 sessions per day</p>
-        <button id="freeBtn" class="active">Current Plan</button>
-      </div>
-
-      <div class="pricing-tier">
-        <h3>Pro</h3>
-        <p>10 sessions per day</p>
-        <div class="price">$15/month</div>
-        <button id="proBtn">Subscribe</button>
-      </div>
-
-      <div class="pricing-tier">
-        <h3>Unlimited</h3>
-        <p>Unlimited sessions per day + Analytics</p>
-        <div class="price">$29/month</div>
-        <button id="unlimitedBtn">Subscribe</button>
-      </div>
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="auth-overlay" style="display: none;">
+    <div class="auth-card">
+      <div class="spinner"></div>
+      <p id="loadingText">Loading...</p>
     </div>
   </div>
-  <script src="js/auth.js"></script>
-  <script src="js/stripe-config.js"></script>
+
+  <div class="subscription-container">
+    <!-- Back Link -->
+    <a href="index.html" class="back-link">
+      ← Back to App
+    </a>
+
+    <!-- User Info -->
+    <div class="user-info" id="userInfo">
+      <p>Welcome, <strong id="userName">User</strong></p>
+      <p>Current Plan: <span id="currentTier">Free Plan</span></p>
+    </div>
+
+    <!-- Header -->
+    <div class="subscription-header">
+      <h1>Choose Your Plan</h1>
+      <p>Unlock more sessions and features.</p>
+    </div>
+
+    <!-- Error/Success Messages -->
+    <div id="messageArea"></div>
+
+    <!-- Plans Grid -->
+    <div class="plans-grid">
+      <!-- Free Plan -->
+      <div class="plan-card current" id="freePlan">
+        <div class="plan-badge">Current Plan</div>
+        <h3 class="plan-title">Free Plan</h3>
+        <p class="plan-description">3 sessions per day</p>
+        <div class="plan-price">
+          <span class="currency">$</span>0
+        </div>
+        <p class="plan-period">Forever free</p>
+        <ul class="plan-features">
+          <li>3 practice sessions daily</li>
+          <li>Basic competing responses</li>
+          <li>Progress tracking</li>
+          <li>Cross-device sync</li>
+        </ul>
+        <button class="plan-button current" disabled>Current Plan</button>
+      </div>
+
+      <!-- Pro Plan -->
+      <div class="plan-card" id="proPlan">
+        <h3 class="plan-title">Pro</h3>
+        <p class="plan-description">10 sessions per day</p>
+        <div class="plan-price">
+          <span class="currency">$</span>15
+        </div>
+        <p class="plan-period">per month</p>
+        <ul class="plan-features">
+          <li>10 practice sessions daily</li>
+          <li>Advanced customization</li>
+          <li>Detailed analytics</li>
+          <li>Export data</li>
+          <li>Priority support</li>
+        </ul>
+        <button class="plan-button subscribe" onclick="subscribeToPlan('pro', 15)" id="proButton">
+          Subscribe
+        </button>
+      </div>
+
+      <!-- Unlimited Plan -->
+      <div class="plan-card popular" id="unlimitedPlan">
+        <div class="plan-badge popular">Most Popular</div>
+        <h3 class="plan-title">Unlimited</h3>
+        <p class="plan-description">Unlimited sessions per day + Analytics</p>
+        <div class="plan-price">
+          <span class="currency">$</span>29
+        </div>
+        <p class="plan-period">per month</p>
+        <ul class="plan-features">
+          <li>Unlimited practice sessions</li>
+          <li>Advanced analytics dashboard</li>
+          <li>Custom progress reports</li>
+          <li>Data export & insights</li>
+          <li>Premium support</li>
+          <li>Early access to new features</li>
+        </ul>
+        <button class="plan-button premium" onclick="subscribeToPlan('unlimited', 29)" id="unlimitedButton">
+          Subscribe
+        </button>
+      </div>
+    </div>
+
+    <!-- Money Back Guarantee -->
+    <div style="text-align: center; margin-top: 40px; color: var(--muted); font-size: 14px;">
+      <p>💳 Secure payment processing by Stripe</p>
+      <p>🔒 Cancel anytime • 30-day money-back guarantee</p>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-auth.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-firestore.js"></script>
+  
+  <!-- Stripe SDK -->
+  <script src="https://js.stripe.com/v3/"></script>
+
   <script>
-    // Stripe buttons logic will go here
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAwGE1f6n_oRq-pdDy2nuvR_EuDTCNaeG4",
+      authDomain: "mybfrb-a89f9.firebaseapp.com",
+      projectId: "mybfrb-a89f9",
+      storageBucket: "mybfrb-a89f9.firebasestorage.app",
+      messagingSenderId: "226276330728",
+      appId: "1:226276330728:web:46ddadded7502f15ee4d5d"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    // Stripe Configuration - REPLACE WITH YOUR ACTUAL STRIPE PUBLISHABLE KEY
+    const stripe = Stripe('pk_test_YOUR_PUBLISHABLE_KEY_HERE'); // You need to get this from Stripe
+
+    let currentUser = null;
+    let userData = null;
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+      showLoading(true);
+      
+      firebase.auth().onAuthStateChanged(async function(user) {
+        if (user) {
+          currentUser = user;
+          await loadUserData();
+          updateUI();
+          showLoading(false);
+        } else {
+          window.location.href = 'login.html';
+        }
+      });
+    });
+
+    function showLoading(show) {
+      document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+    }
+
+    function showMessage(message, type = 'error') {
+      const messageArea = document.getElementById('messageArea');
+      messageArea.innerHTML = `<div class="${type}-message">${message}</div>`;
+      setTimeout(() => {
+        messageArea.innerHTML = '';
+      }, 5000);
+    }
+
+    async function loadUserData() {
+      try {
+        const userRef = firebase.firestore().collection('users').doc(currentUser.uid);
+        const userDoc = await userRef.get();
+        
+        if (userDoc.exists) {
+          userData = userDoc.data();
+        } else {
+          // Create user document if it doesn't exist
+          userData = {
+            email: currentUser.email,
+            subscriptionTier: 'free',
+            subscriptionStatus: 'active'
+          };
+          await userRef.set({
+            ...userData,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        showMessage('Error loading user data: ' + error.message);
+      }
+    }
+
+    function updateUI() {
+      // Update user info
+      document.getElementById('userName').textContent = 
+        currentUser.displayName || currentUser.email.split('@')[0];
+      
+      const tierNames = {
+        'free': 'Free Plan',
+        'pro': 'Pro Plan ($15/month)', 
+        'unlimited': 'Unlimited Plan ($29/month)'
+      };
+      
+      document.getElementById('currentTier').textContent = 
+        tierNames[userData.subscriptionTier] || 'Free Plan';
+
+      // Update plan cards based on current subscription
+      const tier = userData.subscriptionTier || 'free';
+      
+      // Reset all cards
+      document.querySelectorAll('.plan-card').forEach(card => {
+        card.classList.remove('current');
+        const badge = card.querySelector('.plan-badge');
+        if (badge && badge.textContent !== 'Most Popular') {
+          badge.style.display = 'none';
+        }
+      });
+      
+      document.querySelectorAll('.plan-button').forEach(btn => {
+        btn.classList.remove('current');
+        btn.disabled = false;
+        btn.textContent = 'Subscribe';
+      });
+
+      // Highlight current plan
+      const currentPlanMap = {
+        'free': 'freePlan',
+        'pro': 'proPlan', 
+        'unlimited': 'unlimitedPlan'
+      };
+      
+      const currentPlanId = currentPlanMap[tier];
+      if (currentPlanId) {
+        const currentCard = document.getElementById(currentPlanId);
+        currentCard.classList.add('current');
+        
+        const badge = currentCard.querySelector('.plan-badge');
+        if (badge) {
+          badge.textContent = 'Current Plan';
+          badge.style.display = 'block';
+          badge.classList.remove('popular');
+        }
+        
+        const button = currentCard.querySelector('.plan-button');
+        button.classList.add('current');
+        button.disabled = true;
+        button.textContent = 'Current Plan';
+      }
+    }
+
+    async function subscribeToPlan(planType, price) {
+      const buttonId = planType === 'pro' ? 'proButton' : 'unlimitedButton';
+      const button = document.getElementById(buttonId);
+      const originalText = button.innerHTML;
+      
+      try {
+        // Show loading state
+        button.disabled = true;
+        button.innerHTML = '<span class="loading-spinner"></span>Redirecting...';
+        
+        // Create Stripe Checkout session
+        const response = await createCheckoutSession(planType, price);
+        
+        if (response.sessionId) {
+          // Redirect to Stripe Checkout
+          const { error } = await stripe.redirectToCheckout({
+            sessionId: response.sessionId
+          });
+          
+          if (error) {
+            throw new Error(error.message);
+          }
+        } else {
+          throw new Error(response.error || 'Failed to create checkout session');
+        }
+        
+      } catch (error) {
+        console.error('Subscription error:', error);
+        showMessage('Subscription failed: ' + error.message);
+        
+        // Reset button
+        button.disabled = false;
+        button.innerHTML = originalText;
+      }
+    }
+
+    async function createCheckoutSession(planType, price) {
+      try {
+        // This is a simplified version - you'll need to implement this as a Firebase Function
+        // For now, I'll show you the structure you need
+        
+        // In a real implementation, you would call your Firebase Function here:
+        /*
+        const createCheckout = firebase.functions().httpsCallable('createStripeCheckout');
+        const result = await createCheckout({
+          planType: planType,
+          price: price,
+          userId: currentUser.uid,
+          customerEmail: currentUser.email
+        });
+        return result.data;
+        */
+        
+        // TEMPORARY: Show instructions for now
+        showMessage(`
+          <strong>Setup Required:</strong><br>
+          To complete the Stripe integration, you need to:<br>
+          1. Create a Stripe account and get your API keys<br>
+          2. Set up Firebase Functions for payment processing<br>
+          3. Create product/price IDs in Stripe<br>
+          <br>
+          Plan: ${planType} - $${price}/month<br>
+          <a href="#" onclick="showStripeSetupInstructions()">Show detailed setup instructions</a>
+        `, 'error');
+        
+        return { error: 'Stripe integration setup required' };
+        
+      } catch (error) {
+        console.error('Error creating checkout session:', error);
+        return { error: error.message };
+      }
+    }
+
+    function showStripeSetupInstructions() {
+      const instructions = `
+        <div style="text-align: left; max-width: 600px; margin: 20px auto;">
+          <h3>Stripe Integration Setup</h3>
+          
+          <h4>Step 1: Create Stripe Account</h4>
+          <ol>
+            <li>Go to <a href="https://stripe.com" target="_blank">stripe.com</a> and create an account</li>
+            <li>Complete business verification</li>
+            <li>Get your publishable key from the Dashboard</li>
+          </ol>
+          
+          <h4>Step 2: Create Products in Stripe</h4>
+          <ol>
+            <li>In Stripe Dashboard → Products</li>
+            <li>Create "Pro Plan" - $15/month recurring</li>
+            <li>Create "Unlimited Plan" - $29/month recurring</li>
+            <li>Copy the Price IDs</li>
+          </ol>
+          
+          <h4>Step 3: Update Code</h4>
+          <ol>
+            <li>Replace "pk_test_YOUR_PUBLISHABLE_KEY_HERE" with your real Stripe publishable key</li>
+            <li>Set up Firebase Functions for webhook handling</li>
+            <li>Create checkout session endpoint</li>
+          </ol>
+          
+          <p><strong>Need help with implementation?</strong> Let me know and I can provide the complete Firebase Functions code.</p>
+        </div>
+      `;
+      
+      showMessage(instructions, 'error');
+    }
+
+    // Handle successful subscription (when user returns from Stripe)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success') === 'true') {
+      showMessage('🎉 Subscription successful! Your plan has been upgraded.', 'success');
+    }
+    if (urlParams.get('canceled') === 'true') {
+      showMessage('Subscription canceled. You can try again anytime.', 'error');
+    }
   </script>
 </body>
 </html>
