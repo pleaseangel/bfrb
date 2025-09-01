@@ -174,6 +174,12 @@
             userName.textContent = user.displayName || user.email.split('@')[0] || 'User';
           }
           
+          // Initialize user data and load session info
+          initializeUserData(user).then(() => {
+            updateSessionDisplay();
+            initializeBFRBSimulator();
+          });
+          
         } else {
           // Not signed in - go to login
           console.log('No user, redirecting to login');
@@ -192,6 +198,208 @@
 
       // Initialize BFRB Simulator
       initializeBFRBSimulator();
+    }
+
+    // Firebase Session Tracking Functions
+    async function initializeUserData(user) {
+      try {
+        console.log('Initializing user data...');
+        const userRef = firebase.firestore().collection('users').doc(user.uid);
+        const userDoc = await userRef.get();
+        
+        if (!userDoc.exists) {
+          // Create new user document with default values
+          await userRef.set({
+            email: user.email,
+            displayName: user.displayName || '',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            
+            // Subscription info - Updated pricing
+            subscriptionTier: 'free',
+            subscriptionStatus: 'active',
+            stripeCustomerId: null,
+            subscriptionId: null,
+            subscriptionEndDate: null,
+            
+            // Usage tracking
+            dailySessions: {
+              date: new Date().toISOString().split('T')[0],
+              count: 0
+            },
+            totalSessions: 0,
+            
+            // App data
+            totalResistPoints: 0,
+            currentStreak: 0,
+            longestStreak: 0,
+            lastSessionDate: null
+          });
+          console.log('User document created');
+        } else {
+          // Update last seen
+          await userRef.update({
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        }
+      } catch (error) {
+        console.error('Error initializing user data:', error);
+      }
+    }
+
+    async function getUserData() {
+      try {
+        const user = firebase.auth().currentUser;
+        if (!user) return null;
+        
+        const userRef = firebase.firestore().collection('users').doc(user.uid);
+        const userDoc = await userRef.get();
+        
+        return userDoc.exists ? userDoc.data() : null;
+      } catch (error) {
+        console.error('Error getting user data:', error);
+        return null;
+      }
+    }
+
+    async function checkSessionLimit() {
+      try {
+        const userData = await getUserData();
+        if (!userData) return { canStart: false, reason: 'User data not found' };
+        
+        const today = new Date().toISOString().split('T')[0];
+        const dailySessions = userData.dailySessions || { date: today, count: 0 };
+        
+        // Reset daily count if it's a new day
+        let currentCount = dailySessions.count;
+        if (dailySessions.date !== today) {
+          currentCount = 0;
+          await updateUserData({
+            dailySessions: { date: today, count: 0 }
+          });
+        }
+        
+        // Updated session limits based on new pricing
+        const limits = {
+          free: 3,
+          pro: 10,        // $15/month - 10 sessions
+          unlimited: Infinity  // $29/month - unlimited
+        };
+        
+        const tier = userData.subscriptionTier || 'free';
+        const limit = limits[tier] || limits.free;
+        const remaining = limit === Infinity ? Infinity : Math.max(0, limit - currentCount);
+        
+        return {
+          canStart: currentCount < limit,
+          remaining: remaining,
+          tier: tier,
+          currentCount: currentCount,
+          limit: limit
+        };
+      } catch (error) {
+        console.error('Error checking session limit:', error);
+        return { canStart: false, reason: 'Error checking session limit' };
+      }
+    }
+
+    async function updateUserData(updates) {
+      try {
+        const user = firebase.auth().currentUser;
+        if (!user) return false;
+        
+        const userRef = firebase.firestore().collection('users').doc(user.uid);
+        await userRef.update({
+          ...updates,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        return true;
+      } catch (error) {
+        console.error('Error updating user data:', error);
+        return false;
+      }
+    }
+
+    async function incrementSessionCount() {
+      try {
+        const userData = await getUserData();
+        if (!userData) return false;
+        
+        const today = new Date().toISOString().split('T')[0];
+        const dailySessions = userData.dailySessions || { date: today, count: 0 };
+        
+        // Reset daily count if it's a new day
+        let newCount = dailySessions.count + 1;
+        if (dailySessions.date !== today) {
+          newCount = 1;
+        }
+        
+        await updateUserData({
+          dailySessions: { date: today, count: newCount },
+          totalSessions: (userData.totalSessions || 0) + 1,
+          lastSessionDate: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        return true;
+      } catch (error) {
+        console.error('Error incrementing session count:', error);
+        return false;
+      }
+    }
+
+    async function updateSessionDisplay() {
+      try {
+        const sessionCheck = await checkSessionLimit();
+        const userData = await getUserData();
+        
+        // Update tier display
+        const tierElement = document.getElementById('userTier');
+        if (tierElement && userData) {
+          const tierNames = {
+            'free': 'Free Plan',
+            'pro': 'Pro Plan ($15/month)',
+            'unlimited': 'Unlimited Plan ($29/month)'
+          };
+          tierElement.textContent = tierNames[userData.subscriptionTier] || 'Free Plan';
+          tierElement.className = `tier-badge ${userData.subscriptionTier !== 'free' ? 'premium' : ''}`;
+        }
+        
+        // Update sessions remaining display
+        const sessionsElement = document.getElementById('sessionsRemaining');
+        if (sessionsElement) {
+          if (sessionCheck.canStart) {
+            let remainingText;
+            if (sessionCheck.remaining === Infinity) {
+              remainingText = 'Unlimited sessions';
+            } else {
+              remainingText = `${sessionCheck.remaining} session${sessionCheck.remaining !== 1 ? 's' : ''} remaining today`;
+            }
+            sessionsElement.textContent = remainingText;
+            sessionsElement.style.color = '';
+          } else {
+            sessionsElement.textContent = 'Daily limit reached';
+            sessionsElement.style.color = 'var(--warn)';
+          }
+        }
+        
+        // Show/hide upgrade button based on tier
+        const upgradeBtn = document.getElementById('upgradeBtn');
+        if (upgradeBtn && userData) {
+          if (userData.subscriptionTier === 'unlimited') {
+            upgradeBtn.style.display = 'none';
+          } else {
+            upgradeBtn.style.display = 'inline-block';
+            upgradeBtn.onclick = function() {
+              window.location.href = 'subscription.html';
+            };
+          }
+        }
+        
+        console.log('Session display updated:', sessionCheck);
+      } catch (error) {
+        console.error('Error updating session display:', error);
+      }
     }
 
     // Complete BFRB Simulator Code
@@ -399,8 +607,25 @@
       }
 
       // Session management
-      function start() {
+      async function start() {
         if (running) return;
+        
+        // Check session limits before starting
+        console.log('Checking session limits...');
+        const sessionCheck = await checkSessionLimit();
+        if (!sessionCheck.canStart) {
+          showToast('Daily session limit reached. Upgrade for more sessions!');
+          
+          // Show session limit warning
+          const warning = document.getElementById('sessionLimitWarning');
+          if (warning) {
+            warning.style.display = 'flex';
+          }
+          return;
+        }
+        
+        // Increment session count
+        await incrementSessionCount();
         
         running = true;
         tick();
@@ -410,6 +635,9 @@
         }, 20000);
         
         showToast('Session started');
+        
+        // Update session display after starting
+        setTimeout(updateSessionDisplay, 1000);
       }
 
       function reset() {
@@ -447,13 +675,31 @@
         updateHUD();
       }
 
-      function complete() {
+      async function complete() {
         running = false;
         clearInterval(timer);
         clearInterval(reshuffleTimer);
         clearInterval(countdownTimer);
         
         const success = trapHits === 0;
+        
+        // Save session data to Firebase
+        try {
+          const sessionData = {
+            resistPts: resistPts,
+            trapHits: trapHits,
+            pullAttempts: pullAttempts,
+            duration: DURATION_SEC - tLeft,
+            completed: tLeft <= 0,
+            success: success
+          };
+          
+          await saveSessionData(sessionData);
+          console.log('Session data saved');
+        } catch (error) {
+          console.error('Error saving session data:', error);
+        }
+        
         if (success) {
           showToast('🎉 Perfect session! No trap hits.');
           vibrate(60);
@@ -462,6 +708,51 @@
         }
         
         tLeft = DURATION_SEC;
+        
+        // Update session display
+        setTimeout(updateSessionDisplay, 500);
+      }
+
+      async function saveSessionData(sessionData) {
+        try {
+          const user = firebase.auth().currentUser;
+          if (!user) return false;
+          
+          // Add session to sessions collection
+          const sessionRef = firebase.firestore().collection('sessions').doc();
+          await sessionRef.set({
+            userId: user.uid,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            date: new Date().toISOString().split('T')[0],
+            ...sessionData
+          });
+          
+          // Update user totals
+          const userData = await getUserData();
+          if (userData) {
+            const updates = {
+              totalResistPoints: (userData.totalResistPoints || 0) + (sessionData.resistPts || 0)
+            };
+            
+            // Update streak if session was successful
+            if (sessionData.trapHits === 0) {
+              updates.currentStreak = (userData.currentStreak || 0) + 1;
+              updates.longestStreak = Math.max(userData.longestStreak || 0, updates.currentStreak);
+            } else if (sessionData.trapHits > 0) {
+              updates.currentStreak = 0;
+            }
+            
+            await updateUserData(updates);
+            
+            // Update streak display
+            document.getElementById('streak').textContent = updates.currentStreak || userData.currentStreak || 0;
+          }
+          
+          return true;
+        } catch (error) {
+          console.error('Error saving session data:', error);
+          return false;
+        }
       }
 
       function breathing60() {
@@ -502,8 +793,18 @@
       setTimeout(() => {
         buildPatch();
         updateHUD();
+        updateSessionDisplay(); // Load current session info
         console.log('BFRB Simulator initialized successfully');
       }, 500);
+      
+      // Make upgrade button work
+      const upgradeBtn = document.getElementById('upgradeBtn');
+      if (upgradeBtn) {
+        upgradeBtn.addEventListener('click', function() {
+          console.log('Upgrade button clicked');
+          window.location.href = 'subscription.html';
+        });
+      }
     }
 
     // Start initialization when page loads
