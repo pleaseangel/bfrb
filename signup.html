@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login - BFRB Urge Simulator</title>
+  <title>Sign Up - BFRB Urge Simulator</title>
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/auth.css">
 </head>
@@ -12,18 +12,29 @@
     <!-- Header -->
     <div class="auth-header">
       <h1>BFRB Urge Simulator</h1>
-      <p class="auth-subtitle">Welcome back! Sign in to continue your progress.</p>
+      <p class="auth-subtitle">Start your journey to better urge management today.</p>
     </div>
 
-    <!-- Login Form -->
+    <!-- Sign Up Form -->
     <div class="auth-card">
       <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
       </div>
       
-      <h2>Sign In</h2>
+      <h2>Create Account</h2>
       
-      <form id="loginForm">
+      <form id="signupForm">
+        <div class="form-group">
+          <label for="fullName">Full Name (Optional)</label>
+          <input 
+            type="text" 
+            id="fullName" 
+            name="fullName" 
+            placeholder="Enter your full name"
+            autocomplete="name"
+          >
+        </div>
+        
         <div class="form-group">
           <label for="email">Email address</label>
           <input 
@@ -43,21 +54,45 @@
             id="password" 
             name="password" 
             required 
-            placeholder="Enter your password"
-            autocomplete="current-password"
+            placeholder="Create a password"
+            minlength="6"
+            autocomplete="new-password"
           >
+          <div class="password-strength" id="passwordStrength" style="display: none;">
+            <div class="password-strength-fill" id="passwordStrengthFill"></div>
+          </div>
+          <div class="password-hint" id="passwordHint">Password must be at least 6 characters</div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input 
+            type="password" 
+            id="confirmPassword" 
+            name="confirmPassword" 
+            required 
+            placeholder="Confirm your password"
+            autocomplete="new-password"
+          >
+          <div class="password-hint" id="confirmHint" style="display: none;"></div>
         </div>
 
         <div class="form-options">
           <label class="checkbox-label">
-            <input type="checkbox" id="rememberMe">
-            <span>Remember me</span>
+            <input type="checkbox" id="agreeTerms" required>
+            <span>I agree to the <a href="#" class="link" id="termsLink">Terms of Service</a> and <a href="#" class="link" id="privacyLink">Privacy Policy</a></span>
           </label>
-          <a href="#" id="forgotPassword" class="link">Forgot password?</a>
         </div>
 
-        <button type="submit" id="loginBtn" class="auth-btn primary">
-          <span class="btn-text">Sign In</span>
+        <div class="form-options">
+          <label class="checkbox-label">
+            <input type="checkbox" id="emailUpdates" checked>
+            <span>Send me helpful tips and progress updates</span>
+          </label>
+        </div>
+
+        <button type="submit" id="signupBtn" class="auth-btn primary">
+          <span class="btn-text">Create Account</span>
           <div class="btn-spinner" style="display: none;"></div>
         </button>
       </form>
@@ -65,12 +100,12 @@
       <!-- Error Messages -->
       <div id="errorMessage" class="error-message" style="display: none;"></div>
 
-      <!-- Social Login -->
+      <!-- Social Sign Up -->
       <div class="divider">
         <span>or</span>
       </div>
 
-      <button id="googleSignIn" class="auth-btn google">
+      <button id="googleSignUp" class="auth-btn google">
         <svg width="20" height="20" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
           <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -80,74 +115,141 @@
         Continue with Google
       </button>
 
-      <!-- Sign Up Link -->
+      <!-- Sign In Link -->
       <div class="auth-footer">
-        <p>Don't have an account? <a href="signup.html" class="link">Sign up</a></p>
+        <p>Already have an account? <a href="login.html" class="link">Sign in</a></p>
       </div>
     </div>
 
     <!-- Features Preview -->
     <div class="features-preview">
-      <h3>Why sign in?</h3>
+      <h3>What you'll get</h3>
       <div class="features-grid">
+        <div class="feature">
+          <div class="feature-icon">🆓</div>
+          <div>
+            <strong>Free to Start</strong>
+            <span>3 practice sessions daily, no credit card required</span>
+          </div>
+        </div>
         <div class="feature">
           <div class="feature-icon">📊</div>
           <div>
-            <strong>Track Progress</strong>
-            <span>Monitor your improvement over time with detailed analytics</span>
+            <strong>Progress Tracking</strong>
+            <span>Monitor improvement with detailed analytics and charts</span>
           </div>
         </div>
         <div class="feature">
           <div class="feature-icon">🎯</div>
           <div>
-            <strong>Personalized Experience</strong>
-            <span>Custom competing responses & settings sync across devices</span>
+            <strong>Personalized Training</strong>
+            <span>Customize competing responses for your specific needs</span>
           </div>
         </div>
         <div class="feature">
-          <div class="feature-icon">🏆</div>
+          <div class="feature-icon">🔒</div>
           <div>
-            <strong>Streak Tracking</strong>
-            <span>Build momentum with daily practice streaks and achievements</span>
+            <strong>Privacy Protected</strong>
+            <span>Your data is encrypted and completely secure</span>
           </div>
         </div>
         <div class="feature">
-          <div class="feature-icon">📱</div>
+          <div class="feature-icon">💎</div>
           <div>
-            <strong>Cloud Sync</strong>
-            <span>Access your data anywhere, anytime with automatic backup</span>
+            <strong>Upgrade Anytime</strong>
+            <span>More sessions and premium features available</span>
+          </div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🌟</div>
+          <div>
+            <strong>Evidence-Based</strong>
+            <span>Built on proven BFRB therapy techniques</span>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Forgot Password Modal -->
-  <div id="forgotPasswordModal" class="modal" style="display: none;">
+  <!-- Terms Modal -->
+  <div id="termsModal" class="modal" style="display: none;">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Reset Password</h3>
-        <button id="closeForgotModal" class="close-btn">&times;</button>
+        <h3>Terms of Service</h3>
+        <button id="closeTermsModal" class="close-btn">&times;</button>
       </div>
       <div class="modal-body">
-        <p>Enter your email address and we'll send you a link to reset your password.</p>
-        <form id="forgotPasswordForm">
-          <div class="form-group">
-            <label for="resetEmail">Email address</label>
-            <input 
-              type="email" 
-              id="resetEmail" 
-              required 
-              placeholder="Enter your email"
-              autocomplete="email"
-            >
-          </div>
-          <button type="submit" class="auth-btn primary" id="resetBtn">
-            <span class="reset-btn-text">Send Reset Link</span>
-            <div class="btn-spinner" style="display: none;"></div>
-          </button>
-        </form>
-        <div id="resetMessage" style="margin-top: 12px;"></div>
+        <p><strong>BFRB Urge Simulator Terms of Service</strong></p>
+        <p>Last updated: [Date]</p>
+        <h4>1. Acceptance of Terms</h4>
+        <p>By using BFRB Urge Simulator, you agree to these terms and conditions.</p>
+        <h4>2. Description of Service</h4>
+        <p>BFRB Urge Simulator is a wellness tool designed to help users practice urge management techniques. This is not a medical device or treatment.</p>
+        <h4>3. Medical Disclaimer</h4>
+        <p><strong>Important:</strong> This app is not a substitute for professional medical advice, diagnosis, or treatment. Always consult qualified healthcare providers for medical conditions.</p>
+        <h4>4. User Responsibilities</h4>
+        <p>You are responsible for:</p>
+        <ul>
+          <li>Using the app appropriately and safely</li>
+          <li>Maintaining the confidentiality of your account</li>
+          <li>Not sharing your login credentials</li>
+        </ul>
+        <h4>5. Privacy</h4>
+        <p>Your privacy is important to us. Please review our Privacy Policy to understand how we collect and use your information.</p>
+        <h4>6. Limitation of Liability</h4>
+        <p>BFRB Urge Simulator is provided "as is" without warranty. We are not liable for any damages arising from use of the service.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Privacy Modal -->
+  <div id="privacyModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Privacy Policy</h3>
+        <button id="closePrivacyModal" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p><strong>BFRB Urge Simulator Privacy Policy</strong></p>
+        <p>Last updated: [Date]</p>
+        <h4>1. Information We Collect</h4>
+        <p>We collect information you provide directly:</p>
+        <ul>
+          <li>Account information (email, name)</li>
+          <li>App usage data (sessions, progress)</li>
+          <li>Device information for functionality</li>
+        </ul>
+        <h4>2. How We Use Your Information</h4>
+        <p>Your information is used to:</p>
+        <ul>
+          <li>Provide and improve the service</li>
+          <li>Track your progress and maintain streaks</li>
+          <li>Send important updates (if opted in)</li>
+        </ul>
+        <h4>3. Information Sharing</h4>
+        <p>We do NOT sell, trade, or share your personal information with third parties except:</p>
+        <ul>
+          <li>With your explicit consent</li>
+          <li>To comply with legal requirements</li>
+          <li>To protect our rights and safety</li>
+        </ul>
+        <h4>4. Data Security</h4>
+        <p>We use industry-standard security measures including:</p>
+        <ul>
+          <li>Encryption of sensitive data</li>
+          <li>Secure cloud storage (Firebase)</li>
+          <li>Regular security updates</li>
+        </ul>
+        <h4>5. Your Rights</h4>
+        <p>You have the right to:</p>
+        <ul>
+          <li>Access your personal data</li>
+          <li>Delete your account and data</li>
+          <li>Update your information</li>
+          <li>Opt out of communications</li>
+        </ul>
+        <h4>6. Contact Us</h4>
+        <p>For privacy questions, contact us at: [email]</p>
       </div>
     </div>
   </div>
@@ -160,17 +262,27 @@
   <!-- App Scripts -->
   <script src="js/firebase-config.js"></script>
   <script>
-    // Login functionality
+    // Sign up functionality
     document.addEventListener('DOMContentLoaded', function() {
-      const loginForm = document.getElementById('loginForm');
+      const signupForm = document.getElementById('signupForm');
       const errorMessage = document.getElementById('errorMessage');
-      const loginBtn = document.getElementById('loginBtn');
-      const googleSignIn = document.getElementById('googleSignIn');
-      const forgotPassword = document.getElementById('forgotPassword');
-      const forgotPasswordModal = document.getElementById('forgotPasswordModal');
-      const closeForgotModal = document.getElementById('closeForgotModal');
-      const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+      const signupBtn = document.getElementById('signupBtn');
+      const googleSignUp = document.getElementById('googleSignUp');
+      const passwordInput = document.getElementById('password');
+      const confirmPasswordInput = document.getElementById('confirmPassword');
+      const passwordStrength = document.getElementById('passwordStrength');
+      const passwordStrengthFill = document.getElementById('passwordStrengthFill');
+      const passwordHint = document.getElementById('passwordHint');
+      const confirmHint = document.getElementById('confirmHint');
       const loadingOverlay = document.getElementById('loadingOverlay');
+
+      // Modal elements
+      const termsLink = document.getElementById('termsLink');
+      const privacyLink = document.getElementById('privacyLink');
+      const termsModal = document.getElementById('termsModal');
+      const privacyModal = document.getElementById('privacyModal');
+      const closeTermsModal = document.getElementById('closeTermsModal');
+      const closePrivacyModal = document.getElementById('closePrivacyModal');
 
       // Check if user is already logged in
       firebase.auth().onAuthStateChanged(function(user) {
@@ -184,41 +296,141 @@
         }
       });
 
-      // Email/Password Login
-      loginForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
+      // Password strength checking
+      passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        const strength = checkPasswordStrength(password);
         
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
-        
-        if (!email || !password) {
-          showError('Please fill in all fields.');
-          return;
-        }
-        
-        setLoginLoading(true);
-        clearError();
-        
-        try {
-          await firebase.auth().signInWithEmailAndPassword(email, password);
-          showSuccess('Signing in...');
-          // Redirect handled by onAuthStateChanged
-        } catch (error) {
-          showError(getErrorMessage(error.code));
-          setLoginLoading(false);
+        if (password.length > 0) {
+          passwordStrength.style.display = 'block';
+          passwordStrengthFill.style.width = strength.score + '%';
+          passwordStrengthFill.className = 'password-strength-fill ' + strength.level;
+          passwordHint.textContent = strength.message;
+          passwordHint.style.color = getStrengthColor(strength.level);
+        } else {
+          passwordStrength.style.display = 'none';
+          passwordHint.textContent = 'Password must be at least 6 characters';
+          passwordHint.style.color = 'var(--muted)';
         }
       });
 
-      // Google Sign In
-      googleSignIn.addEventListener('click', async function() {
+      // Password confirmation checking
+      confirmPasswordInput.addEventListener('input', function() {
+        const password = passwordInput.value;
+        const confirmPassword = this.value;
+        
+        if (confirmPassword.length > 0) {
+          if (password !== confirmPassword) {
+            this.classList.add('error');
+            confirmHint.textContent = 'Passwords do not match';
+            confirmHint.style.color = 'var(--warn)';
+            confirmHint.style.display = 'block';
+          } else {
+            this.classList.remove('error');
+            this.classList.add('success');
+            confirmHint.textContent = 'Passwords match';
+            confirmHint.style.color = 'var(--ok)';
+            confirmHint.style.display = 'block';
+          }
+        } else {
+          this.classList.remove('error', 'success');
+          confirmHint.style.display = 'none';
+        }
+      });
+
+      // Email/Password Sign Up
+      signupForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const fullName = document.getElementById('fullName').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const agreeTerms = document.getElementById('agreeTerms').checked;
+        const emailUpdates = document.getElementById('emailUpdates').checked;
+        
+        // Validation
+        if (!email || !password) {
+          showError('Please fill in all required fields.');
+          return;
+        }
+        
+        if (password !== confirmPassword) {
+          showError('Passwords do not match.');
+          return;
+        }
+        
+        if (!agreeTerms) {
+          showError('Please agree to the Terms of Service and Privacy Policy.');
+          return;
+        }
+        
+        const strength = checkPasswordStrength(password);
+        if (strength.score < 50) {
+          showError('Please choose a stronger password.');
+          return;
+        }
+        
+        setSignupLoading(true);
+        clearError();
+        
+        try {
+          // Create user account
+          const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+          const user = userCredential.user;
+          
+          // Update profile if name was provided
+          if (fullName) {
+            await user.updateProfile({
+              displayName: fullName
+            });
+          }
+          
+          // Send email verification
+          await user.sendEmailVerification();
+          
+          // Update user preferences in Firestore
+          if (window.firebaseHelpers && window.firebaseHelpers.updateUserData) {
+            await window.firebaseHelpers.updateUserData({
+              emailUpdatesEnabled: emailUpdates,
+              onboardingCompleted: false
+            });
+          }
+          
+          showSuccess('Account created successfully! Please check your email to verify your account.');
+          
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 2000);
+          
+        } catch (error) {
+          showError(getErrorMessage(error.code));
+          setSignupLoading(false);
+        }
+      });
+
+      // Google Sign Up
+      googleSignUp.addEventListener('click', async function() {
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.addScope('email');
         provider.addScope('profile');
         
         try {
           clearError();
-          await firebase.auth().signInWithPopup(provider);
-          showSuccess('Signing in with Google...');
+          const result = await firebase.auth().signInWithPopup(provider);
+          
+          // Set preferences for new Google users
+          if (result.additionalUserInfo.isNewUser) {
+            const emailUpdates = document.getElementById('emailUpdates').checked;
+            if (window.firebaseHelpers && window.firebaseHelpers.updateUserData) {
+              await window.firebaseHelpers.updateUserData({
+                emailUpdatesEnabled: emailUpdates,
+                onboardingCompleted: false
+              });
+            }
+          }
+          
+          showSuccess('Account created successfully!');
           // Redirect handled by onAuthStateChanged
         } catch (error) {
           if (error.code !== 'auth/popup-closed-by-user') {
@@ -227,89 +439,88 @@
         }
       });
 
-      // Forgot Password
-      forgotPassword.addEventListener('click', function(e) {
+      // Modal handlers
+      termsLink.addEventListener('click', function(e) {
         e.preventDefault();
-        forgotPasswordModal.style.display = 'flex';
-        document.getElementById('resetEmail').focus();
+        termsModal.style.display = 'flex';
       });
 
-      closeForgotModal.addEventListener('click', function() {
-        forgotPasswordModal.style.display = 'none';
-        clearResetMessage();
-      });
-
-      // Close modal when clicking outside
-      forgotPasswordModal.addEventListener('click', function(e) {
-        if (e.target === forgotPasswordModal) {
-          forgotPasswordModal.style.display = 'none';
-          clearResetMessage();
-        }
-      });
-
-      // Password Reset Form
-      forgotPasswordForm.addEventListener('submit', async function(e) {
+      privacyLink.addEventListener('click', function(e) {
         e.preventDefault();
-        
-        const email = document.getElementById('resetEmail').value.trim();
-        const resetMessage = document.getElementById('resetMessage');
-        const resetBtn = document.getElementById('resetBtn');
-        const resetBtnText = resetBtn.querySelector('.reset-btn-text');
-        const resetSpinner = resetBtn.querySelector('.btn-spinner');
-        
-        if (!email) {
-          showResetMessage('Please enter your email address.', 'error');
-          return;
-        }
-        
-        // Show loading
-        resetBtnText.style.display = 'none';
-        resetSpinner.style.display = 'block';
-        resetBtn.disabled = true;
-        
-        try {
-          await firebase.auth().sendPasswordResetEmail(email);
-          showResetMessage('Password reset email sent! Check your inbox and spam folder.', 'success');
-          
-          setTimeout(() => {
-            forgotPasswordModal.style.display = 'none';
-            document.getElementById('resetEmail').value = '';
-            clearResetMessage();
-          }, 3000);
-        } catch (error) {
-          showResetMessage(getErrorMessage(error.code), 'error');
-        } finally {
-          // Reset button
-          resetBtnText.style.display = 'block';
-          resetSpinner.style.display = 'none';
-          resetBtn.disabled = false;
-        }
+        privacyModal.style.display = 'flex';
       });
 
-      // Remember me functionality
-      document.getElementById('rememberMe').addEventListener('change', function() {
-        const persistence = this.checked ? 
-          firebase.auth.Auth.Persistence.LOCAL : 
-          firebase.auth.Auth.Persistence.SESSION;
-          
-        firebase.auth().setPersistence(persistence).catch(function(error) {
-          console.warn('Could not set auth persistence:', error);
+      closeTermsModal.addEventListener('click', function() {
+        termsModal.style.display = 'none';
+      });
+
+      closePrivacyModal.addEventListener('click', function() {
+        privacyModal.style.display = 'none';
+      });
+
+      // Close modals when clicking outside
+      [termsModal, privacyModal].forEach(modal => {
+        modal.addEventListener('click', function(e) {
+          if (e.target === modal) {
+            modal.style.display = 'none';
+          }
         });
       });
 
       // Utility Functions
-      function setLoginLoading(loading) {
+      function checkPasswordStrength(password) {
+        let score = 0;
+        let message = '';
+        
+        if (password.length < 6) {
+          return { score: 0, level: 'weak', message: 'Password must be at least 6 characters' };
+        }
+        
+        // Length scoring
+        if (password.length >= 8) score += 25;
+        if (password.length >= 12) score += 25;
+        
+        // Character type scoring
+        if (/[a-z]/.test(password)) score += 10;
+        if (/[A-Z]/.test(password)) score += 10;
+        if (/[0-9]/.test(password)) score += 15;
+        if (/[^A-Za-z0-9]/.test(password)) score += 15;
+        
+        let level = 'weak';
+        if (score >= 30 && score < 70) {
+          level = 'medium';
+          message = 'Good password';
+        } else if (score >= 70) {
+          level = 'strong';
+          message = 'Strong password';
+        } else {
+          message = 'Weak password - add numbers, symbols, or make it longer';
+        }
+        
+        return { score, level, message };
+      }
+
+      function getStrengthColor(level) {
+        switch (level) {
+          case 'weak': return 'var(--warn)';
+          case 'medium': return '#f59e0b';
+          case 'strong': return 'var(--ok)';
+          default: return 'var(--muted)';
+        }
+      }
+
+      function setSignupLoading(loading) {
         const btnText = document.querySelector('.btn-text');
         const spinner = document.querySelector('.btn-spinner');
         
         if (loading) {
           btnText.style.display = 'none';
           spinner.style.display = 'block';
-          loginBtn.disabled = true;
+          signupBtn.disabled = true;
         } else {
           btnText.style.display = 'block';
           spinner.style.display = 'none';
-          loginBtn.disabled = false;
+          signupBtn.disabled = false;
         }
       }
 
@@ -333,38 +544,25 @@
         errorMessage.style.display = 'none';
       }
 
-      function showResetMessage(message, type) {
-        const resetMessage = document.getElementById('resetMessage');
-        resetMessage.innerHTML = `<div class="${type}-message">${message}</div>`;
-      }
-
-      function clearResetMessage() {
-        document.getElementById('resetMessage').innerHTML = '';
-      }
-
       function getErrorMessage(errorCode) {
         switch (errorCode) {
-          case 'auth/user-not-found':
-            return 'No account found with this email address.';
-          case 'auth/wrong-password':
-            return 'Incorrect password. Please try again.';
+          case 'auth/email-already-in-use':
+            return 'An account with this email already exists. Try signing in instead.';
+          case 'auth/weak-password':
+            return 'Password is too weak. Please choose a stronger password.';
           case 'auth/invalid-email':
             return 'Please enter a valid email address.';
-          case 'auth/user-disabled':
-            return 'This account has been disabled.';
-          case 'auth/too-many-requests':
-            return 'Too many failed attempts. Please try again later.';
+          case 'auth/operation-not-allowed':
+            return 'Email/password accounts are not enabled. Please contact support.';
           case 'auth/network-request-failed':
             return 'Network error. Please check your connection.';
-          case 'auth/invalid-credential':
-            return 'Invalid email or password. Please try again.';
           default:
-            return 'An error occurred. Please try again.';
+            return 'An error occurred while creating your account. Please try again.';
         }
       }
 
       // Auto-focus first input
-      document.getElementById('email').focus();
+      document.getElementById('fullName').focus();
     });
   </script>
 </body>
