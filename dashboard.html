@@ -1,1 +1,59 @@
+import { db } from './firebase-config.js';
+import { doc, getDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+const auth = getAuth();
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    const userId = user.uid;
+    const userRef = doc(db, 'users', userId);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+      const data = userSnap.data();
+      document.getElementById('totalPulls').textContent = data.totalPulls || 0;
+      document.getElementById('totalHits').textContent = data.totalHits || 0;
+      document.getElementById('totalResists').textContent = data.totalResists || 0;
+    }
+    
+    // Fetch historical session data
+    const sessionsRef = collection(db, 'users', userId, 'sessions');
+    const q = query(sessionsRef, orderBy('timestamp'));
+    const sessionDocs = await getDocs(q);
+
+    const labels = [];
+    const pulls = [];
+    const hits = [];
+
+    sessionDocs.forEach((doc) => {
+      const sessionData = doc.data();
+      const date = new Date(sessionData.timestamp.toDate()).toLocaleDateString();
+      labels.push(date);
+      pulls.push(sessionData.pullAttempts);
+      hits.push(sessionData.trapHits);
+    });
+
+    const ctx = document.getElementById('pullsChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Pull Attempts',
+          data: pulls,
+          borderColor: 'rgb(255, 99, 132)',
+          tension: 0.1
+        }, {
+          label: 'Trap Hits',
+          data: hits,
+          borderColor: 'rgb(54, 162, 235)',
+          tension: 0.1
+        }]
+      }
+    });
+
+  } else {
+    window.location.href = 'login.html';
+  }
+});
