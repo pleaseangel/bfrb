@@ -125,14 +125,94 @@
     </footer>
   </div>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <!-- Firebase SDKs - Using JSDelivr CDN as backup -->
+  <script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-auth.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/firebase@8.10.1/firebase-firestore.js"></script>
   
   <!-- App Scripts -->
-  <script src="js/firebase-config.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/app.js"></script>
+  <script>
+    // Wait for Firebase to load, then initialize
+    function initializeApp() {
+      if (typeof firebase === 'undefined') {
+        console.log('Firebase not loaded yet, retrying...');
+        setTimeout(initializeApp, 500);
+        return;
+      }
+
+      console.log('Firebase loaded successfully');
+
+      // Your Firebase config
+      const firebaseConfig = {
+        apiKey: "AIzaSyAwGE1f6n_oRq-pdDy2nuvR_EuDTCNaeG4",
+        authDomain: "mybfrb-a89f9.firebaseapp.com",
+        projectId: "mybfrb-a89f9",
+        storageBucket: "mybfrb-a89f9.firebasestorage.app",
+        messagingSenderId: "226276330728",
+        appId: "1:226276330728:web:46ddadded7502f15ee4d5d"
+      };
+
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      console.log('Firebase initialized');
+
+      // Check authentication
+      firebase.auth().onAuthStateChanged(function(user) {
+        console.log('Auth state changed:', user ? user.email : 'No user');
+        
+        const authLoader = document.getElementById('authLoader');
+        const appContent = document.getElementById('appContent');
+        
+        if (user) {
+          // User is signed in - show app
+          authLoader.style.display = 'none';
+          appContent.style.display = 'block';
+          
+          // Update user name
+          const userName = document.getElementById('userName');
+          if (userName) {
+            userName.textContent = user.displayName || user.email.split('@')[0] || 'User';
+          }
+          
+        } else {
+          // Not signed in - show message instead of redirecting
+          console.log('No user signed in');
+          authLoader.style.display = 'none';
+          appContent.innerHTML = `
+            <div style="text-align: center; padding: 50px;">
+              <h2>No User Signed In</h2>
+              <p>You need to be signed in to use this app.</p>
+              <button onclick="testLogin()">Test Login Page</button>
+              <br><br>
+              <p><strong>Firebase Status:</strong> ✅ Working</p>
+              <p><strong>Auth Status:</strong> No user signed in</p>
+            </div>
+          `;
+          appContent.style.display = 'block';
+        }
+      });
+
+      // Logout button
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', function() {
+          console.log('Logging out...');
+          firebase.auth().signOut();
+        });
+      }
+    }
+
+    // Test function to check if login page exists
+    function testLogin() {
+      window.location.href = 'login.html';
+    }
+
+    // Start initialization when page loads
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeApp);
+    } else {
+      initializeApp();
+    }
+  </script>
 </body>
 </html>
